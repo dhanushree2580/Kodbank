@@ -57,6 +57,7 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('kodbank_token');
     localStorage.removeItem('kodbank_user');
+    document.cookie = 'kodbank_token=; path=/; max-age=0';
     navigate('/login');
   };
 

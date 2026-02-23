@@ -22,9 +22,10 @@ const Login = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
-      // Store token and user info in localStorage
+      // Store token and user info in localStorage + cookie
       localStorage.setItem('kodbank_token', data.token);
       localStorage.setItem('kodbank_user', JSON.stringify(data.user));
+      document.cookie = `kodbank_token=${data.token}; path=/; max-age=86400; SameSite=Strict`;
 
       toast({ title: 'Welcome back!', description: `Logged in as ${data.user.username}` });
       navigate('/dashboard');
