@@ -30,7 +30,7 @@ serve(async (req) => {
     ];
 
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/v1/chat/completions",
+      "https://router.huggingface.co/together/v1/chat/completions",
       {
         method: "POST",
         headers: {
