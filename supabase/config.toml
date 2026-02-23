@@ -1,1 +1,13 @@
 project_id = "vxytknrsxwhmkfozuxbv"
+
+[functions.register]
+verify_jwt = false
+
+[functions.login]
+verify_jwt = false
+
+[functions.check-balance]
+verify_jwt = false
+
+[functions.brokod-chat]
+verify_jwt = false
