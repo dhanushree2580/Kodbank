@@ -16,23 +16,21 @@ serve(async (req) => {
     const HF_API_KEY = Deno.env.get("HF_API_KEY");
     if (!HF_API_KEY) throw new Error("HF_API_KEY is not configured");
 
-    // Build prompt in Mistral instruct format
     const systemPrompt =
       "You are Brokod, a friendly and knowledgeable banking support assistant for Kodbank. " +
       "Help users with banking questions, account inquiries, transaction guidance, and general support. " +
       "Be concise, professional, and helpful. If you don't know something, say so honestly.";
 
-    let prompt = `<s>[INST] ${systemPrompt}\n\n`;
-    for (const msg of messages) {
-      if (msg.role === "user") {
-        prompt += `${msg.content} [/INST]`;
-      } else if (msg.role === "assistant") {
-        prompt += ` ${msg.content}</s>[INST] `;
-      }
-    }
+    const chatMessages = [
+      { role: "system", content: systemPrompt },
+      ...messages.map((m: { role: string; content: string }) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    ];
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      "https://router.huggingface.co/hf-inference/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -40,13 +38,10 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 512,
-            temperature: 0.7,
-            top_p: 0.95,
-            return_full_text: false,
-          },
+          model: "mistralai/Mistral-7B-Instruct-v0.2",
+          messages: chatMessages,
+          max_tokens: 512,
+          temperature: 0.7,
         }),
       }
     );
@@ -61,9 +56,9 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const generatedText = data?.[0]?.generated_text?.trim() || "I'm sorry, I couldn't generate a response. Please try again.";
+    const reply = data?.choices?.[0]?.message?.content?.trim() || "I'm sorry, I couldn't generate a response. Please try again.";
 
-    return new Response(JSON.stringify({ reply: generatedText }), {
+    return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
